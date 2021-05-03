@@ -1,0 +1,86 @@
+<div class="page-header">
+  <hr>
+  <h1>1001819448 </h1>
+  <h1>Dinesh Madurantakam </h1>
+</div>
+<br>
+<ngb-accordion [closeOthers]="true" #myaccordion="ngbAccordion" (panelChange)="beforeChange($event)"
+               *ngFor="let item of users">
+  <ngb-panel id="{{item}}" title="User: {{item}}">
+    <ng-template ngbPanelContent>
+      <div class="row">
+        <div class="col col-lg-3">User Name: </div>
+        <div class="col"> {{userInfo.username}}</div>
+        <div class="w-100"></div>
+        <div class="col col-lg-3">Password generated: </div>
+        <div class="col"> {{userInfo.password}}</div>
+        <div class="w-100"></div>
+        <div class="col col-lg-3">AES Key : </div>
+        <div class="col"> {{userInfo.aesKey}}</div>
+        <div class="w-100"></div>
+        <div class="col col-lg-3">RSA Public KEY : </div>
+        <div class="col"> {{userInfo.module}}~{{userInfo.publicExpo}}</div>
+      </div>
+    </ng-template>
+  </ngb-panel>
+
+</ngb-accordion>
+<br>
+<br>
+<div class="md-form">
+  <div class="row">
+    <div class="col-sm">
+      <input #textbox mdbInput type="text" id="form1" class="form-control">
+      <label for="form1" class="">username</label>
+    </div>
+    <div class="col-sm">
+      <button type="button" class="btn btn-primary" (click)="addUser(textbox.value)">Add User</button>
+    </div>
+  </div>
+  <br>
+
+<div class="card-body">
+  <div class="container">
+    <div class="row justify-content-between">
+      <div class="col-3">
+        <select class="form-control" (change)="onSelected($event.target.value)">
+          <option value="0">- Select One -</option>
+          <option value="1">- AES Encryption -</option>
+          <option value="2">- AES Decryption -</option>
+          <option value="3">- RSA Encryption -</option>
+          <option value="4">- RSA Decryption -</option>
+          <option value="5">- Hash MD5 -</option>
+          <option value="6">- Hash SHA-256 -</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card-body" *ngIf="filterId != 0">
+  <div class="container">
+    <div class="row justify-content-between">
+      <div class="md-form">
+        <div class="row">
+          <div class="col-sm">
+            <form [formGroup]="myForm" (ngSubmit)="submit()">
+              <div class="form-group">
+                <label for="file">File Upload</label>
+                <input
+                  formControlName="file"
+                  id="file"
+                  type="file"
+                  class="form-control"
+                  (change)="onFileChange($event)">
+                <div *ngIf="f.file.touched && f.file.invalid" class="alert alert-danger">
+                  <div *ngIf="f.file.errors.required">File is required.</div>
+                </div>
+              </div>
+              <button class="btn btn-primary" type="submit">Submit</button>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
