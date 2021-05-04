@@ -4,6 +4,22 @@
   <h1>Dinesh Madurantakam </h1>
 </div>
 <br>
+<div *ngIf="!login">
+<div class="row">
+  <div class="col-sm">
+    <input #user mdbInput type="text" id="form1" class="form-control">
+    <label for="form1" class="">username</label>
+  </div>
+  <div class="col-sm">
+    <input #password mdbInput type="text" id="form1" class="form-control">
+    <label for="form1" class="">password</label>
+  </div>
+  <div class="col-sm">
+    <button type="button" class="btn btn-primary" (click)="validateUser(user.value, password.value)">Login</button>
+  </div>
+</div>
+</div>
+<div *ngIf="login">
 <ngb-accordion [closeOthers]="true" #myaccordion="ngbAccordion" (panelChange)="beforeChange($event)"
                *ngFor="let item of users">
   <ngb-panel id="{{item}}" title="User: {{item}}">
@@ -20,6 +36,11 @@
         <div class="w-100"></div>
         <div class="col col-lg-3">RSA Public KEY : </div>
         <div class="col"> {{userInfo.module}}~{{userInfo.publicExpo}}</div>
+        <div class="w-100"></div>
+        <div class="col col-lg-3"></div>
+        <div class="col-sm" *ngIf="userInfo.username !== 'admin'">
+          <button type="button" class="btn btn-primary" (click)="deleteUser(userInfo.username)">Delete User</button>
+        </div>
       </div>
     </ng-template>
   </ngb-panel>
@@ -84,3 +105,4 @@
       </div>
     </div>
   </div>
+</div>

@@ -8,10 +8,12 @@ import edu.uta.cse5381.assignment3.service.RSACryptoService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -36,6 +38,21 @@ public class CryptoController {
     @Autowired @Setter HashCryptoService hashCryptoService;
 
     private static final ConcurrentMap<String, UserInfo> USER_INFO_CONCURRENT_MAP = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init() throws NoSuchAlgorithmException {
+        generateUser("admin");
+        USER_INFO_CONCURRENT_MAP.get("admin").setPassword("admin");
+    }
+
+    @PostMapping("/validateUser")
+    public ResponseEntity<?> validateUser(@RequestBody UserInfo userInfo) {
+        UserInfo userInfo1 = USER_INFO_CONCURRENT_MAP.get(userInfo.getUsername());
+        if (null == userInfo1 || !userInfo1.getPassword().equals(userInfo.getPassword())){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(userInfo1);
+    }
 
     @PostMapping("/aesencrypt")
     public ResponseEntity<?> aesEncryption(@RequestBody String body, @RequestParam String user) throws IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
@@ -71,6 +88,11 @@ public class CryptoController {
         }));
     }
 
+    @DeleteMapping("/userinfo")
+    public ResponseEntity<?> deleteUser(@RequestParam String user){
+        USER_INFO_CONCURRENT_MAP.remove(user);
+        return ResponseEntity.ok().build();
+    }
     @GetMapping("/users")
     public ResponseEntity<?> getUsers(){
         return ResponseEntity.ok(USER_INFO_CONCURRENT_MAP.keySet());
@@ -79,13 +101,6 @@ public class CryptoController {
     @RequestMapping(value = "/encrypt-file/{type}/{encryptDecryptFlag}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("type") String type, @PathVariable("encryptDecryptFlag") String encryptDecryptFlag, @RequestParam String user) throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
-        /*System.out.println(request.getInputStream());
-        try (InputStream initialStream = new ByteArrayInputStream(file.getBytes());
-             Reader targetReader = new InputStreamReader(initialStream);){
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }*/
         String text = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(file.getBytes()), StandardCharsets.UTF_8))
                 .lines()

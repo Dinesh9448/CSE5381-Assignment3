@@ -21,6 +21,7 @@ export class AppComponent  {
   users: string[] = [];
   userInfo: UserInfo | null;
   filterId: number = 0;
+  login: boolean = false;
 
   myForm = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.minLength(3)]),
@@ -30,6 +31,10 @@ export class AppComponent  {
 
   constructor(private _httpClient: HttpClient){
     this.repository = new Repository(_httpClient);
+    this.updateUsers();
+  }
+
+  private updateUsers() {
     this.repository.getUsers().subscribe(data => {
       this.users = data;
     });
@@ -107,6 +112,24 @@ export class AppComponent  {
         saveAs(new Blob([res], {type: 'application/text'}), fileName.substring(0, fileName.indexOf('.txt')) + `_${type}_${encryptDecrypt}.txt`);
       });
   }
+
+  validateUser(user: string, password: string){
+
+    let request: any = {"username": user, "password": password};
+    this.repository.validateUser(request).subscribe(res => {
+      this.userInfo = res;
+      this.login = true;
+    },
+      (error) => {
+        alert('Login failed !!!')
+      });
+  }
+
+  deleteUser(username: string){
+     this.repository.deleteUser(username).subscribe((res =>{
+       this.updateUsers();
+     }));
+  }
 }
 
 export interface UserInfo{
@@ -115,8 +138,8 @@ export interface UserInfo{
   aesKey: string;
   rsaPublicKey: string;
 
-  module: string;
-  publicExpo: string;
+  module: BigInteger;
+  publicExpo: BigInteger;
 }
 
 export class Repository{
@@ -138,4 +161,11 @@ export class Repository{
     });
   }
 
+  validateUser(userInfo: string): Observable<UserInfo>{
+    return this._httpClient.post<UserInfo>(`${this.href}/validateUser`, userInfo);
+  }
+
+  deleteUser(username: string){
+    return this._httpClient.delete(`${this.href}/userinfo?user=${username}`);
+  }
 }
